@@ -1,97 +1,29 @@
 import React from 'react';
-import './App.css';
 import random from './utils/randomizer'
+import './App.css';
+import {Random, RandomizeButton} from './components/Random'
+import Column from './components/Column'
+import LoginButton from './components/LoginButton'
+import IdeasBox from './components/IdeasBox'
 
-class Column extends React.Component{
-
-	render(){
-		let name = "Column"
-		let elements = []
-		if(this.props.column != null){
-			name = this.props.column.name
-			elements = this.props.column.elements
-		}
-		const elementsList = elements.map((element) =>
-			<li>{element}</li>
-		);
-
-		// Get the list of elements
-		return (
-		<div>
-			<div>
-				{name}
-			</div>
-			<div>
-				<ul>{elementsList}</ul>
-			</div>
-		</div>
-				
-		)}
-}
-
-class Random extends React.Component{
-
-	render(){
-		const content = random()
-		return (
-		<div>
-			{content}
-		</div>
-		)}
-}
-
-class RandomizeButton extends React.Component{
-	render(){
-		return(
-			<button onClick={this.props.updateRandom}>
-				Refresh Random
-			</button>
-		)
-	}
-}
-
-class IdeasBox extends React.Component{
-
-	render(){
-		
-		let name = "Idea Box"
-		let ideas = []
-		if(this.props.ideas != null){
-			ideas = this.props.ideas
-		}
-		const ideasList = ideas.map((idea) =>
-			<li>{idea}</li>
-		);
-		return (
-		<div>
-			<div>
-				{name}
-			</div>
-			<ul>
-				{ideasList}
-			</ul>
-		</div>
-		)}
-}
-
+const baseURL = "http://localhost:8000/"; 
 class App extends React.Component {
-
-	constructor(props) {
+constructor(props) {
     super(props);
 
     this.state = {
       error: null,
       isLoaded: false,
       boards: [],
-			randoms: this.getRandom()
+			randoms: this.getRandom(),
+			token: null
     }; 
 
-		// Bind the updateRandom
+		// Bind methods
 		this.updateRandom = this.updateRandom.bind(this);
 	}
 
-	componentDidMount(){
-		fetch("http://localhost:8000/boards")
+	componentDidMount(){ fetch(baseURL+"boards", {credentials: 'include'})
 		.then((res) => res.json())
 		//.then((result)=> {console.log(result);})
 		.then(
@@ -120,11 +52,28 @@ class App extends React.Component {
 
 	render(){
 		var columns;
-		if(this.state.isLoaded){
-			columns = this.state.boards.columns
+		// Loading
+		if(!this.state.isLoaded){
+			return (
+				<div>
+					Loading
+				</div>
+				)
 		}
+		// Data returned
 		else{
-			columns = [null, null, null, null]
+			// Not logged in
+			console.log("Boards",this.state.boards)
+			if(!this.state.boards || this.state.boards.length===0){
+				return (
+					<div>
+						<LoginButton />
+						Please log in
+					</div>
+					)
+			}
+			// Logged in, proceed normally
+			columns = this.state.boards.columns
 		}
 		return (
     <div className="App">
@@ -133,48 +82,57 @@ class App extends React.Component {
 		rel="stylesheet"
 		href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
 		integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
-		crossorigin="anonymous"
+		crossOrigin="anonymous"
 				/>
 			</header>
 
-			<div class="container">
-				<div class="row">
-					Board: {this.state.boards.name}
+
+			<div className="container">
+				<div className="app-title">
+					Idea Editor
 				</div>
-				<div class="row">
-					<div class="col-sm">
+				<div className="row">
+					<div className="board-name">
+						Board: {this.state.boards.name}
+					</div>
+				</div>
+				<div className="row pt-1">
+					<div className="col-sm">
 						<Column column={columns[0]}/>
 					</div>
-					<div class="col-sm">
+					<div className="col-sm">
 						<Column column={columns[1]}/>
 					</div>
-					<div class="col-sm">
+					<div className="col-sm">
 						<Column column={columns[2]}/>
 					</div>
-					<div class="col-sm">
+					<div className="col-sm">
 						<Column column={columns[3]}/>
 					</div>
 				</div>
-			</div>
-			<div class="row">
-					<div class="col-sm">
-						<Random content={this.state.randoms[0]}/>
+				<div className="row pt-4">
+						<div className="col-xs">
+							Random Inputs:
+						</div>
+						<div className="col-sm border border-primary">
+							<Random content={this.state.randoms[0]}/>
+						</div>
+						<div className="col-sm border border-primary">
+							<Random content={this.state.randoms[1]}/>
+						</div>
+						<div className="col-sm border border-primary">
+							<Random content={this.state.randoms[1]}/>
 					</div>
-					<div class="col-sm">
-						<Random content={this.state.randoms[1]}/>
+				</div>
+				<div className="row top-buffer">
+					<div className="col-sm">
+						<RandomizeButton updateRandom={this.updateRandom}/>
 					</div>
-					<div class="col-sm">
-						<Random content={this.state.randoms[1]}/>
 				</div>
-			</div>
-			<div class="row">
-				<div class="col-sm">
-					<RandomizeButton updateRandom={this.updateRandom}/>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col-xl">
-					<IdeasBox ideas={this.state.boards.ideas}/>
+				<div className="row top-buffer">
+					<div className="col-xl">
+						<IdeasBox ideas={this.state.boards.ideas}/>
+					</div>
 				</div>
 			</div>
     </div>
