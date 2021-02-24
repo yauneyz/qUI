@@ -1,10 +1,12 @@
 import React from 'react';
-import random from './utils/randomizer'
 import './App.css';
+
 import {Random, RandomizeButton} from './components/Random'
 import Column from './components/Column'
 import LoginButton from './components/LoginButton'
 import IdeasBox from './components/IdeasBox'
+
+import random from './utils/randomizer'
 
 const baseURL = "http://localhost:8000/"; 
 class App extends React.Component {
