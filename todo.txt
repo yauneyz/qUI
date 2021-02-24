@@ -1,0 +1,15 @@
+Use Postman to figure out what I should be getting back
+
+
+Login button form
+- App doesn't recognize the currently logged in user
+Unique key props
+Read router documentation
+Split into two pages
+- conditional "if logged in"
+Read Stripe documentation
+Payments page
+Switch inputs to text boxes
+- database change
+- input change
+- figure out how to save changes to the server 
