@@ -9,7 +9,6 @@ export default class IdeasBox extends React.Component{
 
 	handleChangeFactory(key) { 
 		return function(event){
-		console.log("KEY",key);
 		let ideas = this.state.ideas;
 
 		// Modify the idea

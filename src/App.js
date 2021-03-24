@@ -1,4 +1,6 @@
 import React from 'react';
+import { connect } from "react-redux"
+import store from "./redux/store";
 import './App.css';
 
 import {Random, RandomizeButton} from './components/Random'
@@ -6,77 +8,86 @@ import Column from './components/Column'
 import LoginButton from './components/LoginButton'
 import IdeasBox from './components/IdeasBox'
 
-import random from './utils/randomizer'
+import { login,setStoreState, setLoaded, setRandom } from './redux/actions'
+import save from "./utils/save"
 
 const baseURL = "http://localhost:8000/"; 
 class App extends React.Component {
 constructor(props) {
     super(props);
 
-    this.state = {
-      error: null,
-      isLoaded: false,
-      boards: [],
-			randoms: this.getRandom(),
-			token: null
-    }; 
-
 		// Bind methods
 		this.updateRandom = this.updateRandom.bind(this);
 	}
 
-	componentDidMount(){ fetch(baseURL+"boards", {credentials: 'include'})
+	getBoards(){ 
+		// This only runs if we are logged in
+		fetch(baseURL+"boards", {credentials: 'include'})
 		.then((res) => res.json())
-		//.then((result)=> {console.log(result);})
 		.then(
-			(result) => {
-				this.setState({
-					isLoaded: true,
-					boards: result[0]
-			});
+			(res) => {
+				if(res != null){
+					const boards = res[0];
+					this.props.setStoreState(boards);
+					this.props.setLoaded(true);
+					
+					// Set the save timer
+					this.interval = setInterval(() => save(),2000)
+				}
 		},
 		(error) => {
-			console.log("Error");
-			this.setState({
-				isLoaded: true,
-				error
-			});
+			this.props.setLoaded(false);
 		})
 	}
 
-	getRandom(){
-		return [random(),random(),random()]	
+	componentDidMount(){
+		var self = this;
+		fetch(baseURL + "auth/user",{credentials: 'include'})
+			.then((res)=> {console.log(res);return res})
+			.then((res)=>res.json())
+			.then(function(res){
+				if(res.success){
+					self.props.login(true);
+				}
+			})
+	}
+
+	componentWillUnmount(){
+		if(this.interval){
+			clearInterval(this.interval)
+		}
 	}
 
 	updateRandom(){
-		this.setState({random: this.getRandom()});
+		this.props.setRandom()
 	}
 
 	render(){
-		var columns;
+		// See if we are already logged in
+		if(!this.props.loggedIn){
+			return (
+				<div>
+					<LoginButton />
+					Please log in
+				</div>
+				)
+		}
+
 		// Loading
-		if(!this.state.isLoaded){
+		if(!this.props.isLoaded){
+			this.getBoards()
 			return (
 				<div>
 					Loading
 				</div>
 				)
 		}
-		// Data returned
-		else{
-			// Not logged in
-			console.log("Boards",this.state.boards)
-			if(!this.state.boards || this.state.boards.length===0){
-				return (
-					<div>
-						<LoginButton />
-						Please log in
-					</div>
-					)
-			}
-			// Logged in, proceed normally
-			columns = this.state.boards.columns
-		}
+
+		// Logged in, proceed normally
+		
+		// Set the board that is going to be used here
+		let board = this.props.boards
+		let columns = board.columns
 		return (
     <div className="App">
 			<header>
@@ -95,7 +106,7 @@ constructor(props) {
 				</div>
 				<div className="row">
 					<div className="board-name">
-						Board: {this.state.boards.name}
+						Board: {this.props.boards.name}
 					</div>
 				</div>
 				<div className="row pt-1">
@@ -117,13 +128,13 @@ constructor(props) {
 							Random Inputs:
 						</div>
 						<div className="col-sm border border-primary">
-							<Random content={this.state.randoms[0]}/>
+							<Random content={this.props.randoms[0]}/>
 						</div>
 						<div className="col-sm border border-primary">
-							<Random content={this.state.randoms[1]}/>
+							<Random content={this.props.randoms[1]}/>
 						</div>
 						<div className="col-sm border border-primary">
-							<Random content={this.state.randoms[1]}/>
+							<Random content={this.props.randoms[1]}/>
 					</div>
 				</div>
 				<div className="row top-buffer">
@@ -133,7 +144,7 @@ constructor(props) {
 				</div>
 				<div className="row top-buffer">
 					<div className="col-xl">
-						<IdeasBox ideas={this.state.boards.ideas}/>
+						<IdeasBox ideas={this.props.boards.ideas} getBoards={this.getBoards}/>
 					</div>
 				</div>
 			</div>
@@ -142,4 +153,14 @@ constructor(props) {
 	}
 }
 
-export default App;
+const mapStateToProps = state => {
+	const { loggedIn, boards, randoms, isLoaded } = state;
+	return { 
+		boards: boards,
+		randoms: randoms,
+		isLoaded: isLoaded,
+		loggedIn: loggedIn
+	}
+}
+
+export default connect(mapStateToProps,{login,setRandom,setLoaded,setStoreState})(App);

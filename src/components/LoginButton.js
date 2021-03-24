@@ -1,16 +1,23 @@
 import React from 'react';
+import { login,setStoreState } from "../redux/actions"
+import { connect } from "react-redux"
+import { setLoaded } from '../redux/actions'
 
-export default class LoginButton extends React.Component{
+class LoginButton extends React.Component{
 
 	async login(){
 		const baseURL = "http://localhost:8000/";
-		const data = {email: this.state.email}
+		const data = {email: this.state.email};
 		let res = await fetch(baseURL+"auth/login",{
 			method: 'POST',
+			credentials: 'include',
 			body: JSON.stringify(data),
-			headers: {'Content-Type':'application/json'}
+			headers: {'Content-Type':'application/json',
+			'Accept': 'application/json'}
 		});
-		console.log(res.cookie);
+
+		// Tell the system we've logged in
+		this.props.login()
 	}
 
 	constructor(props) {
@@ -24,7 +31,7 @@ export default class LoginButton extends React.Component{
 
 	handleSubmit(event){
 		event.preventDefault();
-		this.login(this.state.email);
+		this.login();
 	}
 
 	handleChange(event){
@@ -46,3 +53,5 @@ export default class LoginButton extends React.Component{
 		)
 	}
 }
+
+export default connect(null,{login, setStoreState})(LoginButton);
