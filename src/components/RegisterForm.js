@@ -1,36 +1,35 @@
 import React from "react";
-import { login, setStoreState } from "../redux/actions";
+import { login } from "../redux/actions";
 import { connect } from "react-redux";
 
-class LoginButton extends React.Component {
-  async login() {
-    const baseURL = "http://localhost:8000/";
-    const data = { email: this.state.email };
-    await fetch(baseURL + "auth/login", {
-      method: "POST",
-      credentials: "include",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    });
-
-    // Tell the system we've logged in
-    this.props.login();
-  }
-
+class RegisterForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { email: "" };
+    this.state = { email: "", registered: false };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  async register() {
+    const baseURL = process.env.REACT_APP_BASE_URL;
+    const data = { email: this.state.email };
+    const resource = baseURL + "auth/register";
+    await fetch(resource, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "appliction/json",
+      },
+    });
+
+    this.props.login();
+  }
+
   handleSubmit(event) {
     event.preventDefault();
-    this.login();
+    this.register();
   }
 
   handleChange(event) {
@@ -49,10 +48,10 @@ class LoginButton extends React.Component {
             onChange={this.handleChange}
           />
         </label>
-        <button type="submit">Login</button>
+        <button type="submit">Register</button>
       </form>
     );
   }
 }
 
-export default connect(null, { login, setStoreState })(LoginButton);
+export default connect(null, { login })(RegisterForm);

@@ -1,39 +1,56 @@
-import React from 'react'
+import React from "react";
+import { setColumn } from "../redux/actions";
+import { connect } from "react-redux";
 
-export default class Column extends React.Component{
+class Column extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleDataChange = this.handleDataChange.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+  }
 
-	constructor(props) {
-		super(props)
-		this.state = {
-			value: this.props.column.data
-		}
-		this.handleDataChange = this.handleDataChange.bind(this)
-	}
+  handleDataChange(event) {
+    event.preventDefault();
+    this.props.setColumn(this.props.id, this.props.name, event.target.value);
+  }
 
-	handleDataChange(event){
-		this.setState({value: event.target.value})
-	}
+  handleNameChange(event) {
+    event.preventDefault();
+    this.props.setColumn(this.props.id, event.target.value, this.props.data);
+  }
 
-
-	render(){
-		let name = "Column"
-		let data = ""
-		let elements = []
-		if(this.props.column != null){
-			name = this.props.column.name
-			data = this.props.column.data
-		}
-
-		// Get the list of elements
-		return (
-		<div>
-			<div>
-				{name}
-			</div>
-			<div>
-				<textarea rows="15" cols="30" className="form-control" onChange={this.handleDataChange}
-					value={this.state.value}/>
-			</div>
-		</div>
-		)}
+  render() {
+    // Get the list of elements
+    return (
+      <div>
+        <input
+          className="form-control"
+          onChange={this.handleNameChange}
+          value={this.props.name}
+        />
+        <div>
+          <textarea
+            rows="15"
+            cols="30"
+            className="form-control"
+            onChange={this.handleDataChange}
+            value={this.props.data}
+          />
+        </div>
+      </div>
+    );
+  }
 }
+
+const mapStateToProps = (state, ownProps) => {
+  const { id } = ownProps;
+  const column = state.boards.columns[id];
+
+  return {
+    id: id,
+    name: column.name,
+    data: column.data,
+  };
+};
+
+export default connect(mapStateToProps, { setColumn })(Column);

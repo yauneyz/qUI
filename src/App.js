@@ -1,166 +1,206 @@
-import React from 'react';
-import { connect } from "react-redux"
-import store from "./redux/store";
-import './App.css';
+import React from "react";
+import { connect } from "react-redux";
+import "./App.css";
 
-import {Random, RandomizeButton} from './components/Random'
-import Column from './components/Column'
-import LoginButton from './components/LoginButton'
-import IdeasBox from './components/IdeasBox'
+import { Random, RandomizeButton } from "./components/Random";
+import Column from "./components/Column";
+import LoginButton from "./components/LoginButton";
+import RegisterForm from "./components/RegisterForm";
+import LogoutButton from "./components/LogoutButton";
+import BoardsList from "./components/BoardsList";
+import Idea from "./components/Idea";
 
-import { login,setStoreState, setLoaded, setRandom } from './redux/actions'
-import save from "./utils/save"
+import {
+  login,
+  setIdeas,
+  setStoreState,
+  setLoaded,
+  setRandom,
+} from "./redux/actions";
+import save from "./utils/save";
 
-const baseURL = "http://localhost:8000/"; 
+const baseURL = "http://localhost:8000/";
 class App extends React.Component {
-constructor(props) {
+  constructor(props) {
     super(props);
 
-		// Bind methods
-		this.updateRandom = this.updateRandom.bind(this);
-	}
+    // Bind methods
+    this.updateRandom = this.updateRandom.bind(this);
+    this.addIdea = this.addIdea.bind(this);
+  }
 
-	getBoards(){ 
-		// This only runs if we are logged in
-		fetch(baseURL+"boards", {credentials: 'include'})
-		.then((res) => res.json())
-		.then(
-			(res) => {
-				if(res != null){
-					const boards = res[0];
-					this.props.setStoreState(boards);
-					this.props.setLoaded(true);
-					
-					// Set the save timer
-					this.interval = setInterval(() => save(),2000)
-				}
-		},
-		(error) => {
-			this.props.setLoaded(false);
-		})
-	}
+  // Add idea
+  addIdea() {
+    let ideas = this.props.boards.ideas;
+    ideas.push("");
+    this.props.setIdeas(ideas);
+  }
 
-	componentDidMount(){
-		var self = this;
-		fetch(baseURL + "auth/user",{credentials: 'include'})
-			.then((res)=> {console.log(res);return res})
-			.then((res)=>res.json())
-			.then(function(res){
-				if(res.success){
-					self.props.login(true);
-				}
-			})
-	}
+  getBoards() {
+    // This only runs if we are logged in
+    fetch(baseURL + "boards", { credentials: "include" })
+      .then((res) => res.json())
+      .then(
+        (res) => {
+          if (res != null) {
+            const boards = res[0];
+            this.props.setStoreState(boards);
+            this.props.setLoaded(true);
 
-	componentWillUnmount(){
-		if(this.interval){
-			clearInterval(this.interval)
-		}
-	}
+            // Set a timer so we don't clobber old state with new state
+            // When the timer expires after 3 seconds, start saving
+            setTimeout(
+              setInterval(() => save(), 100),
+              3000
+            );
+          }
+        },
+        (error) => {
+          this.props.setLoaded(false);
+        }
+      );
+  }
 
-	updateRandom(){
-		this.props.setRandom()
-	}
+  componentDidMount() {
+    var self = this;
+    fetch(baseURL + "auth/user", { credentials: "include" })
+      .then((res) => {
+        console.log(res);
+        return res;
+      })
+      .then((res) => res.json())
+      .then(function (res) {
+        if (res.success) {
+          self.props.login(true);
+        }
+      });
+  }
 
-	render(){
-		// See if we are already logged in
-		if(!this.props.loggedIn){
-			return (
-				<div>
-					<LoginButton />
-					Please log in
-				</div>
-				)
-		}
+  componentWillUnmount() {
+    if (this.interval) {
+      clearInterval(this.interval);
+    }
+  }
 
-		// Loading
-		if(!this.props.isLoaded){
-			this.getBoards()
-			return (
-				<div>
-					Loading
-				</div>
-				)
-		}
+  updateRandom() {
+    this.props.setRandom();
+  }
 
-		// Logged in, proceed normally
-		
-		// Set the board that is going to be used here
-		let board = this.props.boards
-		let columns = board.columns
-		return (
-    <div className="App">
-			<header>
-				<link
-		rel="stylesheet"
-		href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-		integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
-		crossOrigin="anonymous"
-				/>
-			</header>
+  render() {
+    // See if we are already logged in
+    if (!this.props.loggedIn) {
+      return (
+        <div>
+          <div>
+            Log In:
+            <LoginButton />
+          </div>
+          <div>
+            Register:
+            <RegisterForm />
+          </div>
+        </div>
+      );
+    }
 
+    // Loading
+    if (!this.props.isLoaded) {
+      this.getBoards();
+      return <div>Loading</div>;
+    }
 
-			<div className="container">
-				<div className="app-title">
-					Idea Editor
-				</div>
-				<div className="row">
-					<div className="board-name">
-						Board: {this.props.boards.name}
-					</div>
-				</div>
-				<div className="row pt-1">
-					<div className="col-sm">
-						<Column column={columns[0]}/>
-					</div>
-					<div className="col-sm">
-						<Column column={columns[1]}/>
-					</div>
-					<div className="col-sm">
-						<Column column={columns[2]}/>
-					</div>
-					<div className="col-sm">
-						<Column column={columns[3]}/>
-					</div>
-				</div>
-				<div className="row pt-4">
-						<div className="col-xs">
-							Random Inputs:
-						</div>
-						<div className="col-sm border border-primary">
-							<Random content={this.props.randoms[0]}/>
-						</div>
-						<div className="col-sm border border-primary">
-							<Random content={this.props.randoms[1]}/>
-						</div>
-						<div className="col-sm border border-primary">
-							<Random content={this.props.randoms[1]}/>
-					</div>
-				</div>
-				<div className="row top-buffer">
-					<div className="col-sm">
-						<RandomizeButton updateRandom={this.updateRandom}/>
-					</div>
-				</div>
-				<div className="row top-buffer">
-					<div className="col-xl">
-						<IdeasBox ideas={this.props.boards.ideas} getBoards={this.getBoards}/>
-					</div>
-				</div>
-			</div>
-    </div>
-  );
-	}
+    // Logged in, proceed normally
+
+    // Set the board that is going to be used here
+
+    // Some useful constants
+    const columns = this.props.boards.columns;
+    const ideas = this.props.boards.ideas;
+    const randoms = this.props.randoms;
+
+    // The column, ideas, and random blocks
+    //
+    const colsList = columns.map((column, index) => (
+      <div className="col-sm">
+        <Column id={index} key={index} />
+      </div>
+    ));
+
+    const ideasList = ideas.map((idea, index) => (
+      <div>
+        <Idea id={index} key={index} />
+      </div>
+    ));
+
+    const randomsList = randoms.map((random, index) => (
+      <div className="col-sm border border-primary">
+        <Random content={random} key={index} />
+      </div>
+    ));
+
+    return (
+      <div className="App">
+        <header>
+          <link
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+            integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+            crossOrigin="anonymous"
+          />
+        </header>
+
+        <BoardsList />
+        <div className="main">
+          <div className="container">
+            <div className="app-title">Idea Editor</div>
+            <LogoutButton />
+            <div className="row">
+              <div className="board-name">Board: {this.props.boards.name}</div>
+            </div>
+            <div className="row pt-1">{colsList}</div>
+
+            <div className="row pt-4">
+              <div className="col-xs">Random Inputs:</div>
+              {randomsList}
+            </div>
+            <div className="row top-buffer">
+              <div className="col-sm">
+                <RandomizeButton updateRandom={this.updateRandom} />
+              </div>
+            </div>
+            <div className="row top-buffer">
+              <div className="ideas-header">
+                Ideas
+                <button
+                  className="btn btn-primary float-right"
+                  onClick={this.addIdea}
+                >
+                  Add
+                </button>
+              </div>
+              <div className="col-xl">{ideasList}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = state => {
-	const { loggedIn, boards, randoms, isLoaded } = state;
-	return { 
-		boards: boards,
-		randoms: randoms,
-		isLoaded: isLoaded,
-		loggedIn: loggedIn
-	}
-}
+const mapStateToProps = (state) => {
+  const { loggedIn, boards, randoms, isLoaded } = state;
+  return {
+    boards: boards,
+    randoms: randoms,
+    isLoaded: isLoaded,
+    loggedIn: loggedIn,
+  };
+};
 
-export default connect(mapStateToProps,{login,setRandom,setLoaded,setStoreState})(App);
+export default connect(mapStateToProps, {
+  login,
+  setRandom,
+  setIdeas,
+  setLoaded,
+  setStoreState,
+})(App);

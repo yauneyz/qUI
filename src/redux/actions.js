@@ -1,6 +1,5 @@
-import { LOGIN,SET_LOADED, SET_RANDOM, SET_STATE } from "./action_types.js"
+import { LOGIN,LOGOUT,SET_LOADED,SET_IDEAS, SET_COLUMN,SET_RANDOM, SET_STATE } from "./action_types.js"
 import random from '../utils/randomizer'
-
 export const setStoreState = function(data){
 	return {
 		type: SET_STATE,
@@ -34,4 +33,33 @@ export const login = function() {
 			loggedIn: true
 		}
 	};
+}
+
+export const logout = function() {
+	return {
+		type: LOGOUT,
+		payload: {
+			loggedIn: false
+		}
+	};
+}
+
+export const setColumn = function(id,name,data) {
+	return {
+		type: SET_COLUMN,
+		payload:{
+			id: id,
+			name: name,
+			data: data
+		}
+	}
+}
+
+export const setIdeas = function(ideas) {
+	return {
+		type: SET_IDEAS,
+		payload:{
+			ideas:ideas
+		}
+	}
 }

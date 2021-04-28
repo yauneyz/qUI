@@ -1,4 +1,4 @@
-import {LOGIN,SET_STATE, SET_LOADED, SET_RANDOM} from "../action_types";
+import {LOGOUT,LOGIN,SET_COLUMN,SET_IDEAS,SET_STATE, SET_LOADED, SET_RANDOM} from "../action_types";
 
 const initialState = {
 	boards: [],
@@ -40,7 +40,36 @@ function main(state = initialState, action){
 				loggedIn: loggedIn,
 			}
 		};
-		
+
+		case LOGOUT: {
+			const {loggedIn} = action.payload;
+			return {
+				...state,
+				loggedIn: loggedIn,
+			}
+		};
+
+		case SET_COLUMN: {
+			const {id,name, data} = action.payload;
+			let newBoards = state.boards;
+			newBoards.columns[id].name = name
+			newBoards.columns[id].data = data
+			return {
+				...state,
+				boards:newBoards,
+			}
+		}
+
+		case SET_IDEAS: {
+			const {ideas} = action.payload;
+			return {
+				...state,
+				boards:{
+					...state.boards,
+					ideas:ideas
+				}
+			}
+		}
 
 		default:
 			return state;
