@@ -5,6 +5,7 @@ import "./App.css";
 import { Random, RandomizeButton } from "./components/Random";
 import Column from "./components/Column";
 import LoginButton from "./components/LoginButton";
+import DeleteBoardButton from "./components/DeleteBoardButton";
 import RegisterForm from "./components/RegisterForm";
 import LogoutButton from "./components/LogoutButton";
 import BoardsList from "./components/BoardsList";
@@ -16,6 +17,7 @@ import {
   setStoreState,
   setLoaded,
   setRandom,
+  setActiveBoard,
 } from "./redux/actions";
 import save from "./utils/save";
 
@@ -31,9 +33,9 @@ class App extends React.Component {
 
   // Add idea
   addIdea() {
-    let ideas = this.props.boards.ideas;
+    let ideas = this.props.boards[this.props.active].ideas;
     ideas.push("");
-    this.props.setIdeas(ideas);
+    this.props.setIdeas(ideas, this.props.active);
   }
 
   getBoards() {
@@ -43,8 +45,9 @@ class App extends React.Component {
       .then(
         (res) => {
           if (res != null) {
-            const boards = res[0];
+            const { boards, active } = res;
             this.props.setStoreState(boards);
+            this.props.setActiveBoard(active);
             this.props.setLoaded(true);
 
             // Set a timer so we don't clobber old state with new state
@@ -114,8 +117,10 @@ class App extends React.Component {
     // Set the board that is going to be used here
 
     // Some useful constants
-    const columns = this.props.boards.columns;
-    const ideas = this.props.boards.ideas;
+    const boards = this.props.boards;
+    const active = this.props.active;
+    const columns = this.props.boards[active].columns;
+    const ideas = this.props.boards[active].ideas;
     const randoms = this.props.randoms;
 
     // The column, ideas, and random blocks
@@ -149,16 +154,24 @@ class App extends React.Component {
           />
         </header>
 
+        {/* List of the user's boards */}
         <BoardsList />
+
         <div className="main">
           <div className="container">
+            {/* App Title */}
             <div className="app-title">Idea Editor</div>
+
+            {/* Logout Button */}
             <LogoutButton />
-            <div className="row">
-              <div className="board-name">Board: {this.props.boards.name}</div>
-            </div>
+
+            {/* Delete Board Button */}
+            <DeleteBoardButton />
+
+            {/* Columns */}
             <div className="row pt-1">{colsList}</div>
 
+            {/* Randoms */}
             <div className="row pt-4">
               <div className="col-xs">Random Inputs:</div>
               {randomsList}
@@ -188,12 +201,13 @@ class App extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-  const { loggedIn, boards, randoms, isLoaded } = state;
+  const { loggedIn, boards, randoms, isLoaded, active } = state;
   return {
     boards: boards,
     randoms: randoms,
     isLoaded: isLoaded,
     loggedIn: loggedIn,
+    active: active,
   };
 };
 
@@ -203,4 +217,5 @@ export default connect(mapStateToProps, {
   setIdeas,
   setLoaded,
   setStoreState,
+  setActiveBoard,
 })(App);

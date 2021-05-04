@@ -44,7 +44,7 @@ class Column extends React.Component {
 
 const mapStateToProps = (state, ownProps) => {
   const { id } = ownProps;
-  const column = state.boards.columns[id];
+  const column = state.boards[state.active].columns[id];
 
   return {
     id: id,
