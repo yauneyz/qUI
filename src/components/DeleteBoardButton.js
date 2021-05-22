@@ -24,7 +24,6 @@ class DeleteBoardButton extends React.Component {
     const nextActive = Math.min(active, boards.length - 2);
     boards.splice(active, 1);
     const newBoards = [...boards];
-    debugger;
     this.props.setActiveBoard(nextActive);
     this.props.setStoreState(newBoards);
   }

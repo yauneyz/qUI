@@ -9,6 +9,8 @@ import {
   SET_STATE,
   SET_LOADED,
   SET_RANDOM,
+  RENAME_BOARD,
+  DELETE_BOARD,
 } from "../action_types";
 
 const initialState = {
@@ -34,6 +36,33 @@ function main(state = initialState, action) {
       return {
         ...state,
         active: active,
+      };
+    }
+
+    case RENAME_BOARD: {
+      const { target, newName } = action.payload;
+      const newBoards = [...state.boards];
+      newBoards[target].name = newName;
+      return {
+        ...state,
+        boards: newBoards,
+      };
+    }
+
+    case DELETE_BOARD: {
+      // Don't delete the last board
+      if (state.boards.length === 1) {
+        return state;
+      }
+
+      const { target } = action.payload;
+      state.boards.splice(target, 1);
+      const newBoards = [...state.boards];
+      const newActive = Math.min(state.active, newBoards.length - 1);
+      return {
+        ...state,
+        boards: newBoards,
+        active: newActive,
       };
     }
 

@@ -6,3 +6,5 @@ export const SET_COLUMN = "SET_COLUMN";
 export const SET_IDEAS = "SET_IDEAS";
 export const LOGIN = "LOGIN";
 export const LOGOUT = "LOGOUT";
+export const RENAME_BOARD = "RENAME_BOARD";
+export const DELETE_BOARD = "DELETE_BOARD";

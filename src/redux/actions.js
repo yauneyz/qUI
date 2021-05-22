@@ -7,6 +7,8 @@ import {
   SET_COLUMN,
   SET_RANDOM,
   SET_STATE,
+  DELETE_BOARD,
+  RENAME_BOARD,
 } from "./action_types.js";
 import random from "../utils/randomizer";
 export const setStoreState = function (data) {
@@ -40,6 +42,25 @@ export const setActiveBoard = function (active) {
     type: SET_ACTIVE_BOARD,
     payload: {
       active: active,
+    },
+  };
+};
+
+export const deleteBoard = function (target) {
+  return {
+    type: DELETE_BOARD,
+    payload: {
+      target: target,
+    },
+  };
+};
+
+export const renameBoard = function (target, newName) {
+  return {
+    type: RENAME_BOARD,
+    payload: {
+      target: target,
+      newName: newName,
     },
   };
 };
