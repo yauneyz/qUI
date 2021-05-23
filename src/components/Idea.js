@@ -25,16 +25,20 @@ class Idea extends React.Component {
 
   render() {
     return (
-      <div className="row">
-        <textarea
-          rows="2"
-          cols="60"
-          value={this.props.idea}
-          onChange={this.handleChange}
-        />
-        <button className="btn btn-primary" onClick={this.handleDelete}>
-          Remove
-        </button>
+      <div className="row idea">
+        <div className="col-xl">
+          <textarea
+            rows="2"
+            cols="60"
+            width="100%"
+            height="100%"
+            value={this.props.idea}
+            onChange={this.handleChange}
+          />
+          <button className="btn btn-primary" onClick={this.handleDelete}>
+            Remove
+          </button>
+        </div>
       </div>
     );
   }

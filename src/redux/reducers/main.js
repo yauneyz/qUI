@@ -11,6 +11,9 @@ import {
   SET_RANDOM,
   RENAME_BOARD,
   DELETE_BOARD,
+  REORDER_BOARDS,
+  REORDER_COLUMNS,
+  REORDER_IDEAS,
 } from "../action_types";
 
 const initialState = {
@@ -20,6 +23,14 @@ const initialState = {
   loggedIn: false,
   randoms: ["", "", ""],
 };
+
+function reorder(list, startIndex, endIndex) {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+}
 
 function main(state = initialState, action) {
   switch (action.type) {
@@ -117,6 +128,47 @@ function main(state = initialState, action) {
       });
       let updatedBoards = update(state.boards, {
         $splice: [[active, 1, updatedBoard]],
+      });
+      return {
+        ...state,
+        boards: updatedBoards,
+      };
+    }
+
+    case REORDER_BOARDS: {
+      const { origin, target } = action.payload;
+      const updatedBoards = reorder(state.boards, origin, target);
+      return {
+        ...state,
+        boards: updatedBoards,
+      };
+    }
+
+    case REORDER_COLUMNS: {
+      const { origin, target } = action.payload;
+      const updatedColumns = reorder(
+        state.boards[state.active].columns,
+        origin,
+        target
+      );
+      return {
+        ...state,
+        boards: updatedColumns,
+      };
+    }
+
+    case REORDER_IDEAS: {
+      const { origin, target } = action.payload;
+      const updatedIdeas = reorder(
+        state.boards[state.active].ideas,
+        origin,
+        target
+      );
+      let updatedBoard = update(state.boards[state.active], {
+        ideas: { $set: updatedIdeas },
+      });
+      let updatedBoards = update(state.boards, {
+        $splice: [[state.active, 1, updatedBoard]],
       });
       return {
         ...state,

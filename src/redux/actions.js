@@ -9,6 +9,9 @@ import {
   SET_STATE,
   DELETE_BOARD,
   RENAME_BOARD,
+  REORDER_BOARDS,
+  REORDER_COLUMNS,
+  REORDER_IDEAS,
 } from "./action_types.js";
 import random from "../utils/randomizer";
 export const setStoreState = function (data) {
@@ -100,6 +103,36 @@ export const setIdeas = function (ideas, active) {
     payload: {
       ideas: ideas,
       active: active,
+    },
+  };
+};
+
+export const reorderBoards = function (origin, target) {
+  return {
+    type: REORDER_BOARDS,
+    payload: {
+      origin: origin,
+      target: target,
+    },
+  };
+};
+
+export const reorderColumns = function (origin, target) {
+  return {
+    type: REORDER_COLUMNS,
+    payload: {
+      origin: origin,
+      target: target,
+    },
+  };
+};
+
+export const reorderIdeas = function (origin, target) {
+  return {
+    type: REORDER_IDEAS,
+    payload: {
+      origin: origin,
+      target: target,
     },
   };
 };

@@ -63,3 +63,9 @@ ul{
 .board-name{
 	cursor:pointer
 }
+
+.idea{
+	background: #0096FF;
+	padding: 5px;
+	margin: 5px
+}

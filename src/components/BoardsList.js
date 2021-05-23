@@ -8,8 +8,12 @@ import {
   setStoreState,
   renameBoard,
   deleteBoard,
+  reorderIdeas,
+  reorderBoards,
+  reorderColumns,
 } from "../redux/actions";
 import { connect } from "react-redux";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 class BoardsList extends React.Component {
   constructor(props) {
@@ -31,6 +35,7 @@ class BoardsList extends React.Component {
     this.handleClickAway = this.handleClickAway.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.updateBoardNames = this.updateBoardNames.bind(this);
+    this.onDragEnd = this.onDragEnd.bind(this);
   }
   makeActive(index) {
     this.props.setActiveBoard(index);
@@ -106,6 +111,14 @@ class BoardsList extends React.Component {
     });
   }
 
+  onDragEnd(result) {
+    if (!result.destination) {
+      return;
+    }
+
+    this.props.reorderBoards(result.source.index, result.destination.index);
+  }
+
   render() {
     const boards = this.props.boards;
     const active = this.props.active;
@@ -118,12 +131,11 @@ class BoardsList extends React.Component {
     const handleClickAway = this.handleClickAway;
     const handleKeyPress = this.handleKeyPress;
     const updateBoardNames = this.updateBoardNames;
-    debugger;
 
     const boardsList = boards.map(function (board, index) {
-      // Return a textbox if it's in focus
+      let inner = null;
       if (index === renameFocus) {
-        return (
+        inner = (
           <ClickAwayListener
             onClickAway={(event) => handleClickAway(event, index)}
           >
@@ -132,47 +144,75 @@ class BoardsList extends React.Component {
               autoFocus="true"
               onChange={(event) => updateBoardNames(event, index)}
               onKeyDown={(event) => handleKeyPress(event, index)}
-              key={index}
+              key={board._id}
             />
           </ClickAwayListener>
         );
       }
       // The normal listing
       else {
-        return (
+        inner = (
           <li
             onClick={() => makeActive(index)}
             onContextMenu={(event) => menuOpen(event, index)}
-            key={index}
+            key={board._id}
             className={active === index ? "board-name active" : "board-name"}
           >
             {board.name}
           </li>
         );
       }
+      return (
+        <Draggable key={board._id} draggableId={board._id} index={index}>
+          {(provided, snapshot) => {
+            return (
+              <div
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                {...provided.dragHandleProps}
+              >
+                {inner}
+              </div>
+            );
+          }}
+        </Draggable>
+      );
     });
-    return (
-      <div className="sidenav">
-        <ul>{boardsList}</ul>
-        <Menu
-          keepMounted
-          open={this.state.mouseY !== null}
-          onClose={this.menuClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            this.state.mouseY !== null && this.state.mouseX !== null
-              ? { top: this.state.mouseY, left: this.state.mouseX }
-              : undefined
-          }
-        >
-          <MenuItem onClick={this.openBoardRename}>Rename</MenuItem>
-          <MenuItem onClick={this.deleteSelectedBoard}>Delete</MenuItem>
-        </Menu>
 
-        <button className="btn add-board" onClick={this.addBoard}>
-          Add Board
-        </button>
-      </div>
+    return (
+      <DragDropContext onDragEnd={this.onDragEnd}>
+        <Droppable droppableId="boardsList">
+          {(provided, snapshot) => (
+            <div
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+              className="sidenav"
+            >
+              <ul>{boardsList}</ul>
+              <Menu
+                keepMounted
+                open={this.state.mouseY !== null}
+                onClose={this.menuClose}
+                anchorReference="anchorPosition"
+                anchorPosition={
+                  this.state.mouseY !== null && this.state.mouseX !== null
+                    ? { top: this.state.mouseY, left: this.state.mouseX }
+                    : undefined
+                }
+              >
+                <MenuItem onClick={this.openBoardRename}>Rename</MenuItem>
+                <MenuItem onClick={this.deleteSelectedBoard}>Delete</MenuItem>
+              </Menu>
+
+              {provided.placeholder}
+
+              <button className="btn add-board" onClick={this.addBoard}>
+                Add Board
+              </button>
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     );
   }
 }
@@ -190,4 +230,7 @@ export default connect(mapStateToProps, {
   setActiveBoard,
   setStoreState,
   renameBoard,
+  reorderIdeas,
+  reorderBoards,
+  reorderColumns,
 })(BoardsList);

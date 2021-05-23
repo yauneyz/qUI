@@ -8,3 +8,6 @@ export const LOGIN = "LOGIN";
 export const LOGOUT = "LOGOUT";
 export const RENAME_BOARD = "RENAME_BOARD";
 export const DELETE_BOARD = "DELETE_BOARD";
+export const REORDER_BOARDS = "REORDER_BOARDS";
+export const REORDER_COLUMNS = "REORDER_COLUMNS";
+export const REORDER_IDEAS = "REORDER_IDEAS";

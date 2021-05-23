@@ -10,6 +10,7 @@ import RegisterForm from "./components/RegisterForm";
 import LogoutButton from "./components/LogoutButton";
 import BoardsList from "./components/BoardsList";
 import Idea from "./components/Idea";
+import IdeasList from "./components/IdeasList";
 
 import {
   login,
@@ -131,12 +132,6 @@ class App extends React.Component {
       </div>
     ));
 
-    const ideasList = ideas.map((idea, index) => (
-      <div>
-        <Idea id={index} key={index} />
-      </div>
-    ));
-
     const randomsList = randoms.map((random, index) => (
       <div className="col-sm border border-primary">
         <Random content={random} key={index} />
@@ -191,7 +186,9 @@ class App extends React.Component {
                   Add
                 </button>
               </div>
-              <div className="col-xl">{ideasList}</div>
+            </div>
+            <div className="row">
+              <IdeasList />
             </div>
           </div>
         </div>
